@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<'form' | 'list'>('form');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState(false);
 
   // Load saved data on mount
   useEffect(() => {
@@ -92,11 +93,14 @@ const App: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
              {/* Logo Image - Certifique-se de ter o arquivo logo.png na raiz do projeto */}
-             <img 
-              src="./logo.png" 
-              alt="Logo Senhoras & Senhores" 
-              className="h-16 w-auto object-contain"
-             />
+             {!logoError && (
+               <img 
+                src="./logo.png" 
+                alt="Logo Senhoras & Senhores" 
+                className="h-16 w-auto object-contain"
+                onError={() => setLogoError(true)}
+               />
+             )}
             <div>
               <h1 className="text-2xl font-display font-bold text-brand-blue leading-tight">
                 SENHORAS <span className="text-brand-green">&</span> SENHORES
