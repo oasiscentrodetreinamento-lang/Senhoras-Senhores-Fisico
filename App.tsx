@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Activity, Save, FileText, User, Scale, Timer, Heart, Brain, Stethoscope, Plus, Download, Sparkles, ChevronRight } from 'lucide-react';
 import { Assessment, INITIAL_ASSESSMENT } from './types';
@@ -5,6 +6,12 @@ import { Section } from './components/Section';
 import { InputGroup } from './components/InputGroup';
 import { generatePDF } from './services/pdfService';
 import { analyzeAssessment } from './services/geminiService';
+import { 
+  getBMIClassification, 
+  getHandgripClassification, 
+  getTUGClassification, 
+  getSitToStandClassification 
+} from './services/calculations';
 
 const App: React.FC = () => {
   const [data, setData] = useState<Assessment>(INITIAL_ASSESSMENT);
@@ -92,7 +99,7 @@ const App: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-             {/* Logo Image - Certifique-se de ter o arquivo logo.png na raiz do projeto */}
+             {/* Logo Image */}
              {!logoError && (
                <img 
                 src="./logo.png" 
@@ -182,7 +189,7 @@ const App: React.FC = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-20 -mt-20 transform rotate-45"></div>
                 <div className="relative z-10">
                     <h2 className="text-xl font-bold mb-1">Nova Avaliação Físico-Funcional</h2>
-                    <p className="text-blue-100 text-sm">Preencha os dados abaixo com atenção para gerar o relatório clínico.</p>
+                    <p className="text-blue-100 text-sm">Preencha os dados abaixo com atenção. A classificação dos riscos será calculada automaticamente.</p>
                 </div>
             </div>
 
@@ -245,6 +252,7 @@ const App: React.FC = () => {
                     readOnly
                     className="bg-gray-50 font-bold text-brand-blue"
                     suffix="kg/m²"
+                    feedback={getBMIClassification(data.bmi)}
                 />
                 <InputGroup 
                     label="Data da Avaliação" 
@@ -284,6 +292,7 @@ const App: React.FC = () => {
                     value={data.lowerLimbTest1 || ''}
                     onChange={(e) => handleChange('lowerLimbTest1', parseFloat(e.target.value))}
                     suffix="s"
+                    feedback={getSitToStandClassification(data.lowerLimbTest1)}
                 />
                 <InputGroup 
                     label="2ª Tentativa (segundos)" 
@@ -292,6 +301,7 @@ const App: React.FC = () => {
                     value={data.lowerLimbTest2 || ''}
                     onChange={(e) => handleChange('lowerLimbTest2', parseFloat(e.target.value))}
                     suffix="s"
+                    feedback={getSitToStandClassification(data.lowerLimbTest2)}
                 />
             </Section>
 
@@ -309,6 +319,7 @@ const App: React.FC = () => {
                             value={data.handgripRight1 || ''}
                             onChange={(e) => handleChange('handgripRight1', parseFloat(e.target.value))}
                             suffix="kg"
+                            feedback={getHandgripClassification(data.gender, data.handgripRight1)}
                         />
                         <InputGroup 
                             label="2ª Tentativa" 
@@ -316,6 +327,7 @@ const App: React.FC = () => {
                             value={data.handgripRight2 || ''}
                             onChange={(e) => handleChange('handgripRight2', parseFloat(e.target.value))}
                             suffix="kg"
+                            feedback={getHandgripClassification(data.gender, data.handgripRight2)}
                         />
                     </div>
                     <div className="space-y-4 p-5 bg-gray-50 rounded-xl border border-gray-100">
@@ -329,6 +341,7 @@ const App: React.FC = () => {
                             value={data.handgripLeft1 || ''}
                             onChange={(e) => handleChange('handgripLeft1', parseFloat(e.target.value))}
                             suffix="kg"
+                            feedback={getHandgripClassification(data.gender, data.handgripLeft1)}
                         />
                         <InputGroup 
                             label="2ª Tentativa" 
@@ -336,6 +349,7 @@ const App: React.FC = () => {
                             value={data.handgripLeft2 || ''}
                             onChange={(e) => handleChange('handgripLeft2', parseFloat(e.target.value))}
                             suffix="kg"
+                            feedback={getHandgripClassification(data.gender, data.handgripLeft2)}
                         />
                     </div>
                 </div>
@@ -405,6 +419,7 @@ const App: React.FC = () => {
                         value={data.tugTime || ''}
                         onChange={(e) => handleChange('tugTime', parseFloat(e.target.value))}
                         suffix="segundos"
+                        feedback={getTUGClassification(data.tugTime)}
                     />
                 </div>
             </Section>
