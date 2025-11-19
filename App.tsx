@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Activity, Save, FileText, User, Scale, Timer, Heart, Brain, Stethoscope, Plus, Download, Sparkles, ChevronRight } from 'lucide-react';
+import { Activity, Save, FileText, User, Scale, Timer, Heart, Brain, Stethoscope, Plus, Download, Sparkles, ChevronRight, Thermometer } from 'lucide-react';
 import { Assessment, INITIAL_ASSESSMENT } from './types';
 import { Section } from './components/Section';
 import { InputGroup } from './components/InputGroup';
@@ -10,7 +10,8 @@ import {
   getBMIClassification, 
   getHandgripClassification, 
   getTUGClassification, 
-  getSitToStandClassification 
+  getSitToStandClassification,
+  getTwoMinStepClassification
 } from './services/calculations';
 
 const App: React.FC = () => {
@@ -194,7 +195,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Section 1: Personal Data */}
-            <Section title="Dados Pessoais" className="border-l-4 border-l-brand-blue">
+            <Section title="Dados Pessoais e Sinais Vitais Iniciais" className="border-l-4 border-l-brand-blue">
                 <InputGroup 
                     label="Nome Completo" 
                     placeholder="Ex: Maria da Silva" 
@@ -225,6 +226,14 @@ const App: React.FC = () => {
                     readOnly
                     className="bg-gray-50"
                     suffix="anos"
+                />
+                 <InputGroup 
+                    label="Pressão Arterial (Início)" 
+                    placeholder="Ex: 120/80" 
+                    value={data.bloodPressureStart}
+                    onChange={(e) => handleChange('bloodPressureStart', e.target.value)}
+                    suffix="mmHg"
+                    className="border-2 border-blue-100 rounded-lg p-1"
                 />
             </Section>
 
@@ -355,17 +364,24 @@ const App: React.FC = () => {
                 </div>
             </Section>
 
-            {/* Section 5: Aerobic */}
-            <Section title="Capacidade Aeróbia" className="border-l-4 border-l-brand-blue">
+            {/* Section 5: Aerobic (Updated to 2 Min Step Test) */}
+            <Section title="Capacidade Aeróbia (2 Minutos)" className="border-l-4 border-l-brand-blue">
+                <div className="md:col-span-2 flex items-start gap-3 mb-2 text-sm text-gray-600 bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+                    <Heart size={20} className="text-brand-blue mt-0.5 flex-shrink-0" />
+                    <div>
+                        <strong className="block text-brand-blue mb-1">Teste de Marcha Estacionária (2 Minutos)</strong>
+                        Conte o número de elevações do joelho direito completas em 2 minutos. O joelho deve atingir a altura média entre a patela e a crista ilíaca.
+                    </div>
+               </div>
                 <div className="md:col-span-2">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-4">Teste de Marcha de 6 Minutos</h4>
                     <InputGroup 
-                        label="Total de Passos" 
+                        label="Número de Repetições" 
                         type="number"
-                        placeholder="Ex: 450"
-                        value={data.sixMinWalkSteps || ''}
-                        onChange={(e) => handleChange('sixMinWalkSteps', parseFloat(e.target.value))}
-                        suffix="passos"
+                        placeholder="Ex: 80"
+                        value={data.twoMinStepScore || ''}
+                        onChange={(e) => handleChange('twoMinStepScore', parseFloat(e.target.value))}
+                        suffix="elevações"
+                        feedback={getTwoMinStepClassification(data.calculatedAge, data.gender, data.twoMinStepScore)}
                     />
                 </div>
             </Section>
@@ -424,9 +440,17 @@ const App: React.FC = () => {
                 </div>
             </Section>
 
-             {/* Section 9: Notes */}
-             <Section title="Parecer Profissional" className="border-l-4 border-l-gray-400">
-                <div className="md:col-span-2">
+             {/* Section 9: Final Vitals & Notes */}
+             <Section title="Finalização da Avaliação" className="border-l-4 border-l-gray-400">
+                <div className="md:col-span-2 grid grid-cols-1 gap-4">
+                     <InputGroup 
+                        label="Pressão Arterial (Final)" 
+                        placeholder="Ex: 125/80" 
+                        value={data.bloodPressureEnd}
+                        onChange={(e) => handleChange('bloodPressureEnd', e.target.value)}
+                        suffix="mmHg"
+                        className="max-w-xs border-2 border-blue-100 rounded-lg p-1 bg-blue-50/30"
+                    />
                     <InputGroup 
                         as="textarea"
                         label="Observações e Recomendações"

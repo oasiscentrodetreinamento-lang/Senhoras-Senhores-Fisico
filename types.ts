@@ -1,3 +1,4 @@
+
 export interface Assessment {
   id: string;
   createdAt: string;
@@ -7,6 +8,10 @@ export interface Assessment {
   birthDate: string;
   gender: 'male' | 'female' | '';
   calculatedAge: number;
+
+  // Sinais Vitais
+  bloodPressureStart: string; // ex: 120/80
+  bloodPressureEnd: string;
 
   // Antropometria
   height: number; // cm
@@ -26,8 +31,8 @@ export interface Assessment {
   handgripLeft1: number;
   handgripLeft2: number;
 
-  // Capacidade Aeróbia (6 min walk)
-  sixMinWalkSteps: number;
+  // Capacidade Aeróbia (2 min step test)
+  twoMinStepScore: number; // number of steps
 
   // Escalas
   katzScore: number; // 0-6
@@ -47,6 +52,8 @@ export const INITIAL_ASSESSMENT: Assessment = {
   birthDate: '',
   gender: '',
   calculatedAge: 0,
+  bloodPressureStart: '',
+  bloodPressureEnd: '',
   height: 0,
   weight: 0,
   bmi: 0,
@@ -59,7 +66,7 @@ export const INITIAL_ASSESSMENT: Assessment = {
   handgripRight2: 0,
   handgripLeft1: 0,
   handgripLeft2: 0,
-  sixMinWalkSteps: 0,
+  twoMinStepScore: 0,
   katzScore: 0,
   lawtonScore: 0,
   tugTime: 0,

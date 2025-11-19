@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { Assessment } from "../types";
 
@@ -21,6 +22,7 @@ export const analyzeAssessment = async (data: Assessment): Promise<string> => {
     - Nome: ${data.name}
     - Idade: ${data.calculatedAge} anos
     - Gênero: ${data.gender}
+    - Pressão Arterial Inicial: ${data.bloodPressureStart} | Final: ${data.bloodPressureEnd}
     
     Dados Clínicos:
     - IMC: ${data.bmi.toFixed(2)} (Peso: ${data.weight}kg, Altura: ${data.height}cm)
@@ -28,13 +30,13 @@ export const analyzeAssessment = async (data: Assessment): Promise<string> => {
     - Força MMII (Levantar da cadeira): Melhor tempo ${Math.min(data.lowerLimbTest1 || 99, data.lowerLimbTest2 || 99)}s
     - Força Preensão Manual (Média): Direita ${(data.handgripRight1 + data.handgripRight2)/2}kg, Esquerda ${(data.handgripLeft1 + data.handgripLeft2)/2}kg
     - TUG (Timed Up and Go): ${data.tugTime}s
-    - Caminhada 6 min: ${data.sixMinWalkSteps} passos
+    - Teste de Marcha Estacionária (2 min): ${data.twoMinStepScore} repetições (Capacidade Aeróbia)
     - Escala Katz (AVD): ${data.katzScore}/6
     - Escala Lawton (AIVD): ${data.lawtonScore}/27
     
     Observações do avaliador: ${data.notes}
 
-    Retorne a resposta em formato Markdown, com tópicos claros. Seja direto e profissional.
+    Retorne a resposta em formato Markdown, com tópicos claros. Se houver discrepância significativa na pressão arterial ou valores de risco, mencione.
   `;
 
   try {
