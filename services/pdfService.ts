@@ -56,6 +56,7 @@ export const generatePDF = async (data: Assessment) => {
   let y = 50;
   const leftMargin = 14;
   const rightMargin = 196;
+  const pageHeight = doc.internal.pageSize.height;
   
   // Helper functions
   const resetText = () => {
@@ -204,18 +205,40 @@ export const generatePDF = async (data: Assessment) => {
   addRow("Pressão Arterial (Final)", data.bloodPressureEnd || '-');
   
   if (data.notes) {
-    y += 2;
+    y += 5;
     doc.setFontSize(10);
     doc.setTextColor(50, 50, 50);
+    
+    // Split text to fit width of 180 units
     const splitNotes = doc.splitTextToSize(data.notes, 180);
-    doc.text(splitNotes, leftMargin + 2, y);
+    const lineHeight = 5;
+
+    // Iterate through lines to handle pagination properly
+    for (let i = 0; i < splitNotes.length; i++) {
+        // Check if line fits on page (280 is approx bottom margin area)
+        if (y + lineHeight > 280) {
+            doc.addPage();
+            y = 20; // Reset to top margin
+        }
+        doc.text(splitNotes[i], leftMargin + 2, y);
+        y += lineHeight;
+    }
   }
 
   // Footer
-  const pageHeight = doc.internal.pageSize.height;
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text(`Senhoras & Senhores - Gerado em ${new Date().toLocaleDateString()}`, 105, pageHeight - 10, { align: 'center' });
+  // Note: We don't use the 'y' variable here to pin it to bottom, but we check if we just added a page 
+  // to avoid overwriting if text ended exactly at bottom.
+  // However, for simplicity in this structure, we just print it at the bottom of the current page.
+  // If many pages were added, this footer only appears on the last one. 
+  // To add footer to ALL pages, we would need a loop over doc.internal.getNumberOfPages().
+  
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Senhoras & Senhores - Gerado em ${new Date().toLocaleDateString()} - Pág ${i}/${totalPages}`, 105, pageHeight - 10, { align: 'center' });
+  }
 
   doc.save(`Relatorio_${data.name.replace(/\s+/g, '_')}_${data.assessmentDate}.pdf`);
 };
