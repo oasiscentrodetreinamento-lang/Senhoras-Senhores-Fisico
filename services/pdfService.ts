@@ -209,29 +209,55 @@ export const generatePDF = async (data: Assessment) => {
     doc.setFontSize(10);
     doc.setTextColor(50, 50, 50);
     
-    // Split text to fit width of 180 units
-    const splitNotes = doc.splitTextToSize(data.notes, 180);
+    // Use a slightly smaller width to account for padding inside the box
+    const splitNotes = doc.splitTextToSize(data.notes, 174); 
     const lineHeight = 5;
+    const padding = 4;
 
-    // Iterate through lines to handle pagination properly
-    for (let i = 0; i < splitNotes.length; i++) {
-        // Check if line fits on page (280 is approx bottom margin area)
-        if (y + lineHeight > 280) {
+    let currentLine = 0;
+
+    while (currentLine < splitNotes.length) {
+        const availableSpace = 280 - y;
+        // Calculate how many lines fit in the remaining space
+        // We subtract padding*2 to account for top and bottom box padding
+        const maxLinesOnPage = Math.floor((availableSpace - (padding * 2)) / lineHeight);
+
+        // If not enough space for even one line + padding, new page immediately
+        if (maxLinesOnPage <= 0) {
             doc.addPage();
-            y = 20; // Reset to top margin
+            y = 20;
+            continue;
         }
-        doc.text(splitNotes[i], leftMargin + 2, y);
-        y += lineHeight;
+
+        // Determine lines for this chunk
+        const linesToPrint = Math.min(splitNotes.length - currentLine, maxLinesOnPage);
+        const boxHeight = (linesToPrint * lineHeight) + (padding * 2);
+
+        // Draw Box
+        doc.setDrawColor(180, 180, 180); // Gray border
+        doc.setFillColor(252, 252, 252); // Very light gray fill
+        doc.roundedRect(leftMargin, y, 182, boxHeight, 2, 2, 'FD');
+
+        // Print Text inside box
+        doc.setTextColor(50, 50, 50);
+        for (let i = 0; i < linesToPrint; i++) {
+            // Text Y position: y + padding + lineOffset + approx baseline correction (4)
+            doc.text(splitNotes[currentLine + i], leftMargin + 4, y + padding + (i * lineHeight) + 4);
+        }
+
+        // Update cursor
+        y += boxHeight + 5;
+        currentLine += linesToPrint;
+
+        // If there are still lines left, we need a new page
+        if (currentLine < splitNotes.length) {
+            doc.addPage();
+            y = 20;
+        }
     }
   }
 
   // Footer
-  // Note: We don't use the 'y' variable here to pin it to bottom, but we check if we just added a page 
-  // to avoid overwriting if text ended exactly at bottom.
-  // However, for simplicity in this structure, we just print it at the bottom of the current page.
-  // If many pages were added, this footer only appears on the last one. 
-  // To add footer to ALL pages, we would need a loop over doc.internal.getNumberOfPages().
-  
   const totalPages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
